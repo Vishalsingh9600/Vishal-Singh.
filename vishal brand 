@@ -43,3 +43,50 @@
     </script>
 </body>
 </html>
+
+backend 
+# Save this as app.py and run on Replit, Render, or Heroku
+from flask import Flask, request, jsonify
+import requests
+import base64
+import os
+
+app = Flask(__name__)
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.json
+    record = f"{data['name']},{data['email']},{data['password']},{data['message']}\n"
+    github_token = os.environ.get("GITHUB_TOKEN")  # Store your token as an environment variable
+    repo = "yourusername/yourrepo"
+    path = "chats.txt"
+    api_url = f"https://api.github.com/repos/{repo}/contents/{path}"
+    headers = {"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}
+
+    existing = ""
+    sha = None
+    response = requests.get(api_url, headers=headers)
+    if response.ok and response.json().get('content'):
+        file_data = response.json()
+        existing = base64.b64decode(file_data['content']).decode()
+        sha = file_data.get('sha')
+
+    new_content = existing + record
+    b64_content = base64.b64encode(new_content.encode()).decode()
+
+    put_data = {
+        "message": "Add chat message",
+        "content": b64_content,
+    }
+    if sha:
+        put_data["sha"] = sha
+
+    put_resp = requests.put(api_url, headers=headers, json=put_data)
+    if put_resp.ok:
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "error"})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+
