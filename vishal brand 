@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat With Vishal Singh W F</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .section-glow { box-shadow: 0 0 40px -10px rgba(56, 189, 248, 0.2); }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+    <main class="container mx-auto px-6 py-16 text-center">
+        <h2 class="text-4xl font-bold mb-6">Chat With Me</h2>
+        <form id="chatForm" class="max-w-xl mx-auto bg-gray-900 p-8 rounded-xl section-glow">
+            <input name="name" type="text" placeholder="Your Name" required class="bg-gray-800 mb-4 w-full px-4 py-2 rounded">
+            <input name="email" type="email" placeholder="Email" required class="bg-gray-800 mb-4 w-full px-4 py-2 rounded">
+            <input name="password" type="password" placeholder="Password" required class="bg-gray-800 mb-4 w-full px-4 py-2 rounded">
+            <textarea name="message" placeholder="Type your message" required class="bg-gray-800 mb-4 w-full px-4 py-2 rounded"></textarea>
+            <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg transition-transform hover:scale-105">Send</button>
+        </form>
+        <p id="chatStatus" class="text-sky-400 mt-4"></p>
+    </main>
+    <script>
+    document.getElementById('chatForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const data = new FormData(this);
+        const resp = await fetch('https://YOUR-BACKEND-URL/chat', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: data.get('name'),
+                email: data.get('email'),
+                password: data.get('password'),
+                message: data.get('message')
+            }),
+            headers: {'Content-Type': 'application/json'}
+        });
+        const result = await resp.json();
+        document.getElementById('chatStatus').textContent = result.status === 'success'
+            ? "Message sent!" : "Error sending!";
+    };
+    </script>
+</body>
+</html>
